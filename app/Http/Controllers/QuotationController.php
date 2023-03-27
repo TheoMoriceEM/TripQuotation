@@ -43,6 +43,13 @@ class QuotationController extends Controller
     public function form(Request $request): View
     {
         if ($request->isMethod('post')) {
+            $request->validate([
+                'age.*' => 'required|integer|min:18|max:70',
+                'currency' => 'required|string|in:EUR,GBP,USD',
+                'start_date' => 'required|date|date_format:Y-m-d',
+                'end_date' => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
+            ]);
+
             $input        = $request->all();
             $input['age'] = implode(',', $input['age']);
 
