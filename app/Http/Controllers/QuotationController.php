@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class QuotationController extends Controller
@@ -44,10 +45,10 @@ class QuotationController extends Controller
     {
         if ($request->isMethod('post')) {
             $request->validate([
-                'age.*' => 'required|integer|min:18|max:70',
-                'currency' => 'required|string|in:EUR,GBP,USD',
+                'age.*'      => 'required|integer|min:18|max:70',
+                'currency'   => 'required|string|in:EUR,GBP,USD',
                 'start_date' => 'required|date|date_format:Y-m-d',
-                'end_date' => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
+                'end_date'   => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
             ]);
 
             $input        = $request->all();
@@ -64,7 +65,33 @@ class QuotationController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $input = $request->except('_token');
+        try {
+            $input = $request->validate([
+                'age'        => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $ages = explode(',', $value);
+                        foreach ($ages as $age) {
+                            if (!is_numeric($age)) {
+                                $fail('The ' . $attribute . ' field contains a non-numeric value.');
+                            }
+                            if ((int)$age < 18 || (int)$age > 70) {
+                                $fail('The ' . $attribute . ' field must only contain integers between 18 and 70.');
+                            }
+                        }
+                    },
+                ],
+                'currency'   => 'required|string|in:EUR,GBP,USD',
+                'start_date' => 'required|date|date_format:Y-m-d',
+                'end_date'   => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $e->errors(),
+            ], 422);
+        }
 
         $ageLoadsSum  = 0;
         $ageLoadTable = new Collection(self::AGE_LOAD_TABLE);
