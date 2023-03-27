@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\WebController;
+use App\Http\Controllers\QuotationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,4 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/quotation-form', [WebController::class, 'quotationForm'])->name('quotation-form');
+Route::match(['get', 'post'], '/quotation-form', [QuotationController::class, 'form'])->name('quotation.form');

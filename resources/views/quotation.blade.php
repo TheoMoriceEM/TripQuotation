@@ -9,7 +9,7 @@
     <body class="antialiased">
         <div class="container">
             <h1 class="my-4">Enter your information below to get a quotation for your trip</h1>
-            <form method="POST" action="{{ route('quotation-form') }}">
+            <form method="POST" action="{{ route('quotation.form') }}">
                 @csrf
 
                 <div class="row mb-3" id="travellers">
@@ -44,6 +44,13 @@
 
                 <button type="submit" class="btn btn-primary">Generate a quotation</button>
             </form>
+
+            @isset($total, $currency_id, $quotation_id)
+                <div class="row mt-5">
+                    <h2>Your quotation :</h2>
+                    <p>{{ $total }} {{ $currency_id }} (quotation no. {{ $quotation_id }})</p>
+                </div>
+            @endisset
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N" crossorigin="anonymous"></script>
